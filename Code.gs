@@ -505,3 +505,150 @@ function getFolderIdByName(folderName, folderCountMax = 10) {
   }
   return result;
 }
+
+
+/**
+* Returns a string of the Id of a file or folder based on its Id.
+* Note: If there is more than 1 parent folder for fileOrFolderId then getParentIdById
+returns an array of all parent folder paths for the parent folders, with the
+parentFolderId at the end.
+*
+* @function getParentIdById
+* @author Shir Aviv <https://excelshir.com>
+* @version 1.0
+* Date created: July 12, 2020
+*
+* @param {string} fileOrFolderId - ID of the desired file or folder.
+* @param {number} [parentFolderCountMax=10] - The maximum number of parent folders that
+will be displayed. If the parent folder count exceeds parentFolderCountMax then an
+error message will be displayed.
+*  - Note: If omitted, the default value is 10.
+*
+* @returns {(string|Array)} result - String of the parent folder Id, or an array
+of all folder paths of parent folders of fileOrFolderId.
+*  - If there is NO error, "result" returns the Id of parentFolder.
+*  - If there IS an error, "result" returns an error message for user to display
+     or log.
+*/
+
+function getParentIdById(fileOrFolderId, parentFolderCountMax = 10) {
+  
+  // Declare variables.
+  var parentFolderCount = 0;
+  var parentFolders = "";
+  var parentFolder = "";
+  var parentFolderIdArray = [];
+  var parentFolderNameArray = [];
+  var result = [];
+
+  // --- Start of error checking ---
+  // Error checking for @param fileOrFolderId
+  
+  // Use try and catch when using fileOrFolderId to avoid an error.
+  try {
+    // Capture invalid entry errors
+    if (fileOrFolderId == "") throw "empty";
+    if (fileOrFolderId == null) throw "null";
+    if (typeof fileOrFolderId == "number") throw "a number"; 
+    if (typeof fileOrFolderId == "object") throw "an object";
+    if (typeof fileOrFolderId != "string") throw "not a string";
+    
+    // Assign all parent folders of a file by fileOrFolderId.
+    parentFolders = DriveApp.getFileById(fileOrFolderId).getParents();
+  }
+  
+  // If there is an Exception, specify the error message in path variable.
+  catch(err){
+    
+    // The only way to check if the fileOrFolderId is invalid is to try it and
+    // get an Exception.
+    if (err.name == "Exception"){
+      err = "invalid";
+    }
+    
+    // Specify error message.
+    result = "fileOrFolderId is " + err +
+           ". Please enter a valid fileOrFolderId and try again.";
+    
+    // Return result variable and end the script if there is an error.
+    return result;
+  }
+  
+  // Error checking for @param parentFolderCountMax
+  
+  // Use try and catch when using parentFolderCountMax to avoid an error.
+  try {
+    // Capture invalid entry errors
+    if (parentFolderCountMax == null) throw "null";
+    if (typeof parentFolderCountMax == "object") throw "an object";
+    if (typeof parentFolderCountMax == "boolean") throw "a boolean";
+    if (typeof parentFolderCountMax == "string") throw "a string";
+    if (typeof parentFolderCountMax != "number") throw "not a number";
+  }
+  
+  // If there is an Exception, specify the error message in the result.
+  catch (err){
+    
+    // Specify error message.
+    result = "parentFolderCountMax is " + err + ". Please enter a valid " +
+             "parentFolderCountMax (or omit it) and try again.";
+    
+    //Return result variable and end the script if there is an error.
+    return result;
+  }
+  // --- End of error checking ---
+  
+  // Loop through all parent folders of fileOrFolderId to determine parentFolderCount,
+  // assign Ids to parentFolderIdArray, and assign names to parentFolderNameArray.
+  while (parentFolders.hasNext()) {
+    parentFolder = parentFolders.next();
+    parentFolderIdArray[parentFolderCount] = parentFolder.getId();
+    parentFolderNameArray[parentFolderCount] = parentFolder.getName();
+    parentFolderCount++;
+  }
+  
+  // Reset parentFolders
+  parentFolders = DriveApp.getFileById(fileOrFolderId).getParents();
+  
+  // If 0 == parentFolderCount, then show error message.
+  // Note: This will occur if fileOrFolderId is the Id for My Drive.
+  if (0 == parentFolderCount) {
+    result = "There are 0 parent folders for fileOrFolderId. " + 
+             "Please enter a different fileOrFolderId and try again."
+  }
+  
+  // If there are more parent Folders than the parentFolderCountMax, then show error message.
+  if (parentFolderCountMax < parentFolderCount) {
+    result = "There are " + parentFolderCount + " parent folders in your drive for " +
+             "fileOrFolderId. Please increase the @param parentFolderCountMax (current " +
+             "value of " + parentFolderCountMax + ")\n" +
+             "to match or exceed the parentFolderCount and try again.";
+  }
+  
+  // Else if 1 == parentFolderCount, then proceed with the simplest scenario.
+  else if (1 == parentFolderCount) {
+
+    // Assign the next ParentFolders to result.    
+    result = parentFolders.next().getId();
+  }
+  
+  // If there are multiple parentFolders, then display the full file
+  // path for each parentFolder and assign to result.
+  else if (1 < parentFolderCount) {
+    
+    // Loop through all instances of the parentFolders and assign each
+    // file path to result.
+    for (n = 0; n < parentFolderCount; n++) {
+      
+      // if parentFolderName == "My Drive" then only show My Drive Id.
+      if (parentFolderNameArray[n] == "My Drive") {
+        result[n] = parentFolderIdArray[n];
+      }
+      
+      // Assign the file path + parent Folder Id to result.
+      else result[n] = getFilePathById(parentFolderIdArray[n]," > ") +
+                       " > " + parentFolderIdArray[n];
+    }
+  }
+  return result;
+}
