@@ -13,6 +13,10 @@ folder.
 * @param {string} [delimiter=" > "] - The characters in between each folder in the
 path.
 *  - Note: If omitted, the default is " > ".
+* @param {number} [pathCountMax=10] - The maximum number of paths that will be
+displayed. If the result count exceeds pathCountMax then an error message
+will be displayed.
+*  - Note: If omitted, the default value is 10.
 *
 * @returns {(string|Array)} path - String of the file path of fileOrFolderId, or
 an array of all file paths of fileOrFolderId.
@@ -21,7 +25,7 @@ an array of all file paths of fileOrFolderId.
      log.
 */
 
-function getFilePathById(fileOrFolderId, delimiter = " > ") {
+function getFilePathById(fileOrFolderId, delimiter = " > ", pathCountMax = 10) {
   var path = [];
   var pathHelper = [];
   var pathFolderCount = 0;
@@ -84,6 +88,28 @@ function getFilePathById(fileOrFolderId, delimiter = " > ") {
     return path;
   }
   
+  // Error checking for @param pathCountMax
+  
+  // Use try and catch when using pathCountMax to avoid an error.
+  try {
+    // Capture invalid entry errors
+    if (pathCountMax == null) throw "null";
+    if (typeof pathCountMax == "object") throw "an object";
+    if (typeof pathCountMax == "boolean") throw "a boolean";
+    if (typeof pathCountMax == "string") throw "a string";
+    if (typeof pathCountMax != "number") throw "not a number";
+  }
+  
+  // If there is an Exception, specify the error message in the result.
+  catch (err){
+    
+    // Specify error message.
+    result = "pathCountMax is " + err + ". Please enter a valid " +
+             "pathCountMax (or omit it) and try again.";
+    
+    //Return result variable and end the script if there is an error.
+    return result;
+  }
 
   // --- End of error checking ---
 
@@ -106,6 +132,14 @@ function getFilePathById(fileOrFolderId, delimiter = " > ") {
   if (0 == parentFolderCount) {
     path = "There are 0 parent folders for fileOrFolderId. " + 
            "Please enter a different fileOrFolderId and try again."
+  }
+  
+  // If there are more parent Folders than the pathCountMax, then show error message.
+  else if (pathCountMax < parentFolderCount) {
+    path = "There are " + parentFolderCount + " parent folders in your drive for " +
+           "fileOrFolderId. Please increase the @param pathCountMax (current " +
+           "value of " + pathCountMax + ")\n" +
+           "to match or exceed the parentFolderCount and try again.";
   }
   
   // Else if 1 == parentFolderCount, then proceed with the simplest scenario.
@@ -228,6 +262,10 @@ returns an array of all file paths for that file with the file Id at the end.
 * Date created: July 11, 2020
 *
 * @param {string} fileName - Name of the desired file.
+* @param {number} [fileCountMax=10] - The maximum number of files that will be
+displayed. If the file count exceeds fileCountMax then an error message
+will be displayed.
+*  - Note: If omitted, the default value is 10.
 *
 * @returns {(string|Array)} result - String of the file Id of fileName, or an array
 of all file paths of files with the name fileName.
@@ -236,7 +274,7 @@ of all file paths of files with the name fileName.
      or log.
 */
 
-function getFileIdByName(fileName) {
+function getFileIdByName(fileName, fileCountMax = 10) {
 
   // Declare variables.
   var fileCount = 0;
@@ -270,6 +308,29 @@ function getFileIdByName(fileName) {
     return result;
   }
   
+  // Error checking for @param fileCountMax
+  
+  // Use try and catch when using resultCountMax to avoid an error.
+  try {
+    // Capture invalid entry errors
+    if (fileCountMax == null) throw "null";
+    if (typeof fileCountMax == "object") throw "an object";
+    if (typeof fileCountMax == "boolean") throw "a boolean";
+    if (typeof fileCountMax == "string") throw "a string";
+    if (typeof fileCountMax != "number") throw "not a number";
+  }
+  
+  // If there is an Exception, specify the error message in the result.
+  catch (err){
+    
+    // Specify error message.
+    result = "fileCountMax is " + err + ". Please enter a valid " +
+             "fileCountMax (or omit it) and try again.";
+    
+    //Return result variable and end the script if there is an error.
+    return result;
+  }
+  
   // --- End of error checking ---
   
   // Loop through all files with name fileName to determine fileCount and assign Ids
@@ -283,6 +344,14 @@ function getFileIdByName(fileName) {
   // If there are 0 files with the name fileName, then show error message.
   if (0 == fileCount) {
     result = "No file in your drive exists with the name: " + fileName;  
+  }
+
+  // If there are more folders than the resultCountMax, then show error message.
+  else if (fileCountMax < fileCount) {
+    result = "There are " + fileCount + " files in your drive with the name: " +
+             fileName + ".\n" + "Please increase the @param fileCountMax "
+             "(current value of " + fileCountMax + ")\n" +
+             "to match or exceed the fileCount and try again.";
   }
 
   // If there is EXACTLY 1 file with the name fileName, then assign the file Id.
@@ -321,6 +390,10 @@ returns an array of all folder paths for that folder with the folder Id at the e
 * Date created: July 11, 2020
 *
 * @param {string} folderName - Name of the desired folder.
+* @param {number} [folderCountMax=10] - The maximum number of folders that will be
+displayed. If the folder count exceeds resultCountMax then an error message
+will be displayed.
+*  - Note: If omitted, the default value is 10.
 *
 * @returns {(string|Array)} result - String of the folder Id of folderName, or an array
 of all folder paths of folders with the name folderName.
@@ -329,7 +402,7 @@ of all folder paths of folders with the name folderName.
      or log.
 */
 
-function getFolderIdByName(folderName) {
+function getFolderIdByName(folderName, folderCountMax = 10) {
 
   // Declare variables.
   var folderCount = 0;
@@ -363,6 +436,29 @@ function getFolderIdByName(folderName) {
     return result;
   }
   
+  // Error checking for @param folderCountMax
+  
+  // Use try and catch when using folderCountMax to avoid an error.
+  try {
+    // Capture invalid entry errors
+    if (folderCountMax == null) throw "null";
+    if (typeof folderCountMax == "object") throw "an object";
+    if (typeof folderCountMax == "boolean") throw "a boolean";
+    if (typeof folderCountMax == "string") throw "a string";
+    if (typeof folderCountMax != "number") throw "not a number";
+  }
+  
+  // If there is an Exception, specify the error message in the result.
+  catch (err){
+    
+    // Specify error message.
+    result = "folderCountMax is " + err + ". Please enter a valid " +
+             "folderCountMax (or omit it) and try again.";
+    
+    //Return result variable and end the script if there is an error.
+    return result;
+  }
+  
   // --- End of error checking ---
   
   // Loop through all folders with name folderName to determine folderCount and assign Ids
@@ -376,6 +472,14 @@ function getFolderIdByName(folderName) {
   // If there are 0 folders with the name folderName, then show error message.
   if (0 == folderCount) {
     result = "No file in your drive exists with the name: " + folderName;  
+  }
+  
+  // If there are more folders than the resultCountMax, then show error message.
+  else if (folderCountMax < folderCount) {
+    result = "There are " + folderCount + " folders in your drive with the name: " +
+             folderName + ".\n" + "Please increase the @param folderCountMax "
+             "(current value of " + folderCountMax + ")\n" +
+             "to match or exceed the folderCount and try again.";
   }
 
   // If there is EXACTLY 1 folder with the name folderName, then assign the folder Id.
